@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import           Control.Applicative
-import           Snap.Core
-import           Snap.Util.FileServe
-import           Snap.Http.Server
-import           User
+import Control.Applicative
+import Snap.Core
+import Snap.Util.FileServe
+import Snap.Http.Server
+import User
 import Database.MongoDB
 import Control.Monad.Trans (liftIO)
 import Control.Monad.IO.Class

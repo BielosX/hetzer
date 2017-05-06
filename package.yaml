@@ -1,0 +1,27 @@
+name: kingtiger
+version: 0.1.0
+
+dependencies:
+    - base
+    - bytestring
+    - monad-control
+    - mtl
+    - snap-core
+    - snap-server
+    - mongoDB
+    - text
+    - aeson
+
+executables:
+    kingtiger:
+        source-dirs: src
+        main: Main.hs
+        exposed-modules: User
+
+tests:
+    spec:
+        main: Spec.hs
+        source-dirs:
+            - test
+            - src
+        dependencies: hspec

@@ -7,7 +7,8 @@ import GHC.Generics
 import Data.Aeson
 
 data User = User {
-                    name :: String, email :: String
+                    name :: String,
+                    email :: String
                 } deriving (Show, Generic)
 
 instance FromJSON User where

@@ -1,4 +1,4 @@
-name: kingtiger
+name: hetzer
 version: 0.1.0
 
 dependencies:
@@ -13,7 +13,7 @@ dependencies:
     - aeson
 
 executables:
-    kingtiger:
+    hetzer:
         source-dirs: src
         main: Main.hs
         exposed-modules: User

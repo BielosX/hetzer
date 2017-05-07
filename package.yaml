@@ -11,6 +11,8 @@ dependencies:
     - mongoDB
     - text
     - aeson
+    - uuid
+    - random
 
 executables:
     hetzer:

@@ -15,7 +15,7 @@ class User {
     }
 }
 
-axios.post('/users', {name: "Tomasz", email: "tomasz@tomasz.com"})
+axios.post('/users', {name: "abc", email: "abc@abc.com"})
     .then(() => {
     axios.get('/users')
         .then((response) => {

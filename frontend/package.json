@@ -1,0 +1,22 @@
+{
+  "name": "hetzer",
+  "version": "1.0.0",
+  "description": "hetzer frontend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BielosX/hetzer.git"
+  },
+  "author": "Mateusz Biel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BielosX/hetzer/issues"
+  },
+  "homepage": "https://github.com/BielosX/hetzer#readme",
+  "dependencies": {
+      "axios": "0.16.1"
+  }
+}

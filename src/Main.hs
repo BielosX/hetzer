@@ -16,6 +16,8 @@ import Data.Maybe
 import Data.UUID
 import System.Random
 import Data.List
+import Control.Applicative
+import Control.Monad
 
 getDatabase :: DB.Database
 getDatabase = "my_database"
@@ -34,15 +36,26 @@ performAction action = do
 main :: IO ()
 main = quickHttpServe site
 
-site :: Snap ()
-site =
-    ifTop (writeBS "hello world") <|>
-    route [
+handlers = [
             ("users", method POST addNewUser),
             ("users", method GET getUsers),
             ("users/:userId", method GET getUser)
-          ] <|>
-    dir "static" (serveDirectory ".")
+          ]
+
+postFilters = [fields]
+
+fields :: () -> Snap ()
+fields () = do
+    writeBS "szakalaka"
+
+applyFilters :: MonadSnap m => [a -> m a] -> [(ByteString, m a)] -> [(ByteString, m a)]
+applyFilters post handlers = Data.List.map (\(bs, monad) -> (bs, monad >>= postFilters)) handlers
+    where postFilters = Data.List.foldl (>=>) (\x -> return x) post
+
+site :: Snap ()
+site =
+    ifTop (writeBS "hello world") <|>
+    route (applyFilters postFilters handlers)  <|> dir "static" (serveDirectory ".")
 
 addNewUser :: Snap ()
 addNewUser = do

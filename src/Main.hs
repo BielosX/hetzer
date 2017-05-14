@@ -46,7 +46,8 @@ postFilters = [fields]
 
 fields :: () -> Snap ()
 fields () = do
-    writeBS "szakalaka"
+    flds <- getQueryParam "fields"
+    maybe (return ()) writeBS flds
 
 applyFilters :: MonadSnap m => [a -> m a] -> [(ByteString, m a)] -> [(ByteString, m a)]
 applyFilters post handlers = Data.List.map (\(bs, monad) -> (bs, monad >>= postFilters)) handlers

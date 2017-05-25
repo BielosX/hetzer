@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 module User where
 
-import Database.MongoDB
+import qualified Database.MongoDB as DB
 import qualified Data.Text as TXT
 import GHC.Generics
 import Data.Aeson
@@ -18,12 +18,12 @@ data User = User {
 instance FromJSON User where
 instance ToJSON User where
 
-userToDocument :: User -> Document
-userToDocument user = [TXT.pack "_id" =: new_id, TXT.pack "name" =: name user, TXT.pack "email" =: email user]
-    where new_id = fromMaybe Database.MongoDB.Null (fmap (val . Database.MongoDB.UUID . BS.pack) $ User.id user)
+userToDocument :: User -> DB.Document
+userToDocument user = [TXT.pack "_id" DB.=: new_id, TXT.pack "name" DB.=: name user, TXT.pack "email" DB.=: email user]
+    where new_id = fromMaybe DB.Null (fmap (DB.val . DB.UUID . BS.pack) $ User.id user)
 
-userFromDocument :: Document -> User
+userFromDocument :: DB.Document -> User
 userFromDocument doc = User id name email
-    where id = Just $ (show :: Database.MongoDB.UUID -> String) $ typed $ valueAt (TXT.pack "_id") doc
-          name = typed $ valueAt (TXT.pack "name") doc
-          email = typed $ valueAt (TXT.pack "email") doc
+    where id = Just $ (show :: DB.UUID -> String) $ DB.typed $ DB.valueAt (TXT.pack "_id") doc
+          name = DB.typed $ DB.valueAt (TXT.pack "name") doc
+          email = DB.typed $ DB.valueAt (TXT.pack "email") doc

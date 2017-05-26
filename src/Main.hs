@@ -66,7 +66,7 @@ addNewUser = do
 
 insertUser user = do
     uuid <- liftIO $ randomIO
-    liftIO $ performAction $ DB.insert "users" $ userToDocument $ user {User.id = Just $ Data.UUID.toString uuid}
+    liftIO $ performAction $ DB.insert "users" $ userToDocument $ user {User.id = Just uuid}
     return ()
 
 getUser :: Snap ()

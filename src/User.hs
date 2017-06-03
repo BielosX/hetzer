@@ -9,6 +9,7 @@ import Data.UUID
 import Data.Maybe
 import Data.ByteString
 import qualified Data.Typeable as Typeable
+import UUIDconverter
 
 data User = User {
                     id :: Maybe UUID,
@@ -29,5 +30,3 @@ userFromDocument doc = User id name email
           name = DB.typed $ DB.valueAt (TXT.pack "name") doc
           email = DB.typed $ DB.valueAt (TXT.pack "email") doc
 
-mongoUUIDtoUUID :: DB.UUID -> Maybe UUID
-mongoUUIDtoUUID (DB.UUID str) = fromASCIIBytes str

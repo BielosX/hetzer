@@ -10,6 +10,8 @@ import Data.Maybe
 import Data.ByteString
 import qualified Data.Typeable as Typeable
 import UUIDconverter
+import qualified Data.List as List
+import Control.Applicative
 
 data User = User {
                     id :: Maybe UUID,
@@ -21,8 +23,10 @@ instance FromJSON User where
 instance ToJSON User where
 
 userToDocument :: User -> DB.Document
-userToDocument user = [TXT.pack "_id" DB.=: new_id, TXT.pack "name" DB.=: name user, TXT.pack "email" DB.=: email user]
+userToDocument user = getZipList ((DB.=:) <$> fields <*> values)
     where new_id = fromMaybe DB.Null (fmap (DB.val . DB.UUID . toASCIIBytes) $ User.id user)
+          fields = ZipList $ List.map TXT.pack ["_id", "name", "email"]
+          values = ZipList [DB.val $ new_id, DB.val $ name user, DB.val $ email user]
 
 userFromDocument :: DB.Document -> User
 userFromDocument doc = User id name email

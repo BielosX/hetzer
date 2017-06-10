@@ -5,6 +5,7 @@ import Control.Applicative
 import Snap.Core
 import Snap.Util.FileServe
 import Snap.Http.Server
+import Snap.Snaplet
 import User
 import qualified Database.MongoDB as DB
 import Control.Monad.Trans (liftIO)
@@ -18,6 +19,15 @@ import System.Random
 import Data.List
 import Control.Applicative
 import Control.Monad
+
+data DatabaseConfig = DatabaseConfig {
+    databse_addr :: String,
+    database_name :: String
+}
+
+data Hetzer = Hetzer {
+    database_conf :: DatabaseConfig
+}
 
 getDatabase :: DB.Database
 getDatabase = "my_database"
@@ -33,32 +43,14 @@ performAction action = do
     DB.close pipe
     return result
 
-main :: IO ()
-main = quickHttpServe site
-
 handlers = [
+            ("/", writeBS "Hetzer"),
             ("users", method POST addNewUser),
             ("users", method GET getUsers),
             ("users/:userId", method GET getUser)
           ]
 
-postFilters = [fields]
-
-fields :: () -> Snap ()
-fields () = do
-    flds <- getQueryParam "fields"
-    maybe (return ()) writeBS flds
-
-applyFilters :: MonadSnap m => [a -> m a] -> [(ByteString, m a)] -> [(ByteString, m a)]
-applyFilters post handlers = Data.List.map (\(bs, monad) -> (bs, monad >>= postFilters)) handlers
-    where postFilters = Data.List.foldl (>=>) (\x -> return x) post
-
-site :: Snap ()
-site =
-    ifTop (writeBS "hello world") <|>
-    route (applyFilters postFilters handlers)  <|> dir "static" (serveDirectory ".")
-
-addNewUser :: Snap ()
+addNewUser :: Handler Hetzer Hetzer ()
 addNewUser = do
     body <- readRequestBody 2048
     user <- return (decode body)
@@ -69,23 +61,30 @@ insertUser user = do
     liftIO $ performAction $ DB.insert "users" $ userToDocument $ user {User.id = Just uuid}
     return ()
 
-getUser :: Snap ()
+getUser :: Handler Hetzer Hetzer ()
 getUser = do
     param <- getParam "userId"
     loadUser param
 
-loadUser :: Maybe ByteString -> Snap ()
+loadUser :: Maybe ByteString -> Handler Hetzer Hetzer ()
 loadUser (Just param) = do
     document <- liftIO $ performAction $ (DB.find (DB.select ["_id" DB.=: DB.UUID param] "users") >>= DB.rest)
     returnDocument document
 loadUser Nothing = writeBS "userId is not specified"
 
-returnDocument :: [DB.Document] -> Snap ()
+returnDocument :: [DB.Document] -> Handler Hetzer Hetzer ()
 returnDocument (a:ax) = writeLBS $ encode $ userFromDocument a
 returnDocument [] = writeBS "user does not exist"
 
-getUsers :: Snap ()
+getUsers :: Handler Hetzer Hetzer ()
 getUsers = do
     documents <- liftIO $ performAction $ (DB.find (DB.select [] "users") >>= DB.rest)
     writeLBS $ encode $ liftToJSON toJSON toJSON $ Data.List.map userFromDocument documents
+
+hetzer = makeSnaplet "hetzer" "hetzer" Nothing $ do
+    addRoutes handlers
+    return $ Hetzer (DatabaseConfig "0.0.0.0" "my_database")
+
+main :: IO ()
+main = serveSnaplet defaultConfig hetzer
 

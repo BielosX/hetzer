@@ -8,6 +8,7 @@ dependencies:
     - mtl
     - snap-core
     - snap-server
+    - snap
     - mongoDB
     - text
     - aeson

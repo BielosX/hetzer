@@ -19,6 +19,8 @@ import System.Random
 import Data.List
 import Control.Applicative
 import Control.Monad
+import Control.Monad.State
+import qualified Data.ByteString.Lazy as BS
 
 data DatabaseConfig = DatabaseConfig {
     databse_addr :: String,
@@ -26,7 +28,8 @@ data DatabaseConfig = DatabaseConfig {
 }
 
 data Hetzer = Hetzer {
-    database_conf :: DatabaseConfig
+    _database_conf :: DatabaseConfig,
+    _database_connection :: DB.Pipe
 }
 
 getDatabase :: DB.Database
@@ -35,12 +38,8 @@ getDatabase = "my_database"
 getAccessMode :: DB.AccessMode
 getAccessMode = DB.master
 
-getDatabaseAddr = "0.0.0.0"
-
-performAction action = do
-    pipe <- DB.connect $ DB.host $ getDatabaseAddr
-    result <- DB.access pipe getAccessMode getDatabase action
-    DB.close pipe
+performAction conn action = do
+    result <- DB.access conn getAccessMode getDatabase action
     return result
 
 handlers = [
@@ -53,12 +52,14 @@ handlers = [
 addNewUser :: Handler Hetzer Hetzer ()
 addNewUser = do
     body <- readRequestBody 2048
-    user <- return (decode body)
+    user <- return $ (decode :: BS.ByteString -> Maybe User) body
     maybe (writeBS "unable to parse JSON") insertUser user
 
+insertUser :: User -> Handler Hetzer Hetzer ()
 insertUser user = do
     uuid <- liftIO $ randomIO
-    liftIO $ performAction $ DB.insert "users" $ userToDocument $ user {User.id = Just uuid}
+    connection <- gets _database_connection
+    liftIO $ performAction connection $ DB.insert "users" $ userToDocument $ user {User.id = Just uuid}
     return ()
 
 getUser :: Handler Hetzer Hetzer ()
@@ -68,7 +69,8 @@ getUser = do
 
 loadUser :: Maybe ByteString -> Handler Hetzer Hetzer ()
 loadUser (Just param) = do
-    document <- liftIO $ performAction $ (DB.find (DB.select ["_id" DB.=: DB.UUID param] "users") >>= DB.rest)
+    connection <- gets _database_connection
+    document <- liftIO $ performAction connection $ (DB.find (DB.select ["_id" DB.=: DB.UUID param] "users") >>= DB.rest)
     returnDocument document
 loadUser Nothing = writeBS "userId is not specified"
 
@@ -78,13 +80,21 @@ returnDocument [] = writeBS "user does not exist"
 
 getUsers :: Handler Hetzer Hetzer ()
 getUsers = do
-    documents <- liftIO $ performAction $ (DB.find (DB.select [] "users") >>= DB.rest)
+    connection <- gets _database_connection
+    documents <- liftIO $ performAction connection $ (DB.find (DB.select [] "users") >>= DB.rest)
     writeLBS $ encode $ liftToJSON toJSON toJSON $ Data.List.map userFromDocument documents
 
-hetzer = makeSnaplet "hetzer" "hetzer" Nothing $ do
+hetzerInit db_conf pipe = makeSnaplet "hetzer" "hetzer" Nothing $ do
     addRoutes handlers
-    return $ Hetzer (DatabaseConfig "0.0.0.0" "my_database")
+    return $ Hetzer db_conf pipe
+
+connectDatabase :: DatabaseConfig -> IO DB.Pipe
+connectDatabase config = DB.connect $ DB.host $ databse_addr config
 
 main :: IO ()
-main = serveSnaplet defaultConfig hetzer
+main = do
+    db_conf <- return $ DatabaseConfig "0.0.0.0" "my_database"
+    pipe <- connectDatabase db_conf
+    serveSnaplet defaultConfig (hetzerInit db_conf pipe)
+    DB.close pipe
 

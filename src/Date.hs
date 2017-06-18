@@ -1,11 +1,16 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Date where
 
+import qualified Data.Aeson as AS
+
 import Text.Printf
 import Text.Show
 import Text.Regex.TDFA
 import Text.ParserCombinators.ReadP
 import Text.Read
+import Data.Text
+import Data.Aeson.Types
+import Control.Applicative
 
 data Date = Date {
         year :: Int,
@@ -26,7 +31,19 @@ instance Read Date where
         where readsP = readsPrec 0
 
 matchDate :: String -> (String, String, String, [String])
-matchDate date = date =~ "([0-9]{4})-([0-9]{2})-([0-9]{2})" :: (String, String, String, [String])
+matchDate date = date =~ date_regex :: (String, String, String, [String])
 
 readString :: String -> Int
 readString = (read :: String -> Int)
+
+instance AS.ToJSON Date where
+    toJSON = AS.String . pack . (show :: Date -> String)
+
+instance AS.FromJSON Date where
+    parseJSON = AS.withText "String" $ \t ->
+                                        if match (unpack t)
+                                        then pure $ (read :: String -> Date) $ unpack t
+                                        else fail  "Incorrect data format."
+        where match x = x =~ date_regex :: Bool
+
+date_regex = "([0-9]{4})-([0-9]{2})-([0-9]{2})"

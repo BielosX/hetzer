@@ -14,7 +14,7 @@ import Control.Applicative
 
 userToDocument :: User -> DB.Document
 userToDocument user = getZipList ((DB.=:) <$> fields <*> values)
-    where new_id = fromMaybe DB.Null (fmap (DB.val . DB.UUID . toASCIIBytes) $ User.id user)
+    where new_id = maybeUUIDtoMongoValue $ User.id user
           fields = ZipList $ List.map TXT.pack ["_id", "name", "email"]
           values = ZipList [DB.val $ new_id, DB.val $ name user, DB.val $ email user]
 

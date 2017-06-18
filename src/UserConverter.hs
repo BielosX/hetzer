@@ -1,4 +1,4 @@
-module UserConverter where
+module UserConverter(userToDocument, userFromDocument) where
 
 import User
 import UUIDconverter
@@ -20,6 +20,9 @@ userToDocument user = getZipList ((DB.=:) <$> fields <*> values)
 
 userFromDocument :: DB.Document -> User
 userFromDocument doc = User id name email
-    where id = mongoUUIDtoUUID $ DB.typed $ DB.valueAt (TXT.pack "_id") doc
-          name = DB.typed $ DB.valueAt (TXT.pack "name") doc
-          email = DB.typed $ DB.valueAt (TXT.pack "email") doc
+    where id = mongoUUIDtoUUID $ getValue "_id" doc
+          name = DB.typed $ getValue "name" doc
+          email = DB.typed $ getValue "email" doc
+
+getValue :: DB.Val a => String -> DB.Document -> a
+getValue s = DB.typed . DB.valueAt (TXT.pack s)

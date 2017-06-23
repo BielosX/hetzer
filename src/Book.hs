@@ -15,8 +15,8 @@ data Book = Book {
                     isbn :: String,
                     genere :: String,
                     published :: Date,
-                    quantity :: Maybe Int,
-                    left_in_stock :: Maybe Int
+                    quantity :: Int,
+                    left :: Int
                 } deriving (Show, Generic)
 
 instance FromJSON Book where

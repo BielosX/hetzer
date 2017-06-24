@@ -41,9 +41,12 @@ instance AS.ToJSON Date where
 
 instance AS.FromJSON Date where
     parseJSON = AS.withText "String" $ \t ->
-                                        if match (unpack t)
+                                        if isDate (unpack t)
                                         then pure $ (read :: String -> Date) $ unpack t
                                         else fail  "Incorrect data format."
-        where match x = x =~ date_regex :: Bool
 
 date_regex = "([0-9]{4})-([0-9]{2})-([0-9]{2})"
+
+isDate :: String -> Bool
+isDate d = d =~ date_regex
+

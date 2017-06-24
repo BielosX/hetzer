@@ -5,6 +5,8 @@ import DatabaseConfig
 import Hetzer
 
 import qualified UsersRepository as UR
+import qualified BooksResource as BR
+
 import qualified Database.MongoDB as DB
 import qualified Data.List as List
 import qualified System.IO as IO
@@ -26,7 +28,7 @@ import Data.Either.Unwrap
 import Data.Aeson
 
 hetzerInit db_conf pipe = makeSnaplet "hetzer" "hetzer" Nothing $ do
-    addRoutes UR.handlers
+    addRoutes (UR.handlers ++ BR.handlers)
     return $ Hetzer db_conf pipe
 
 getConfFilePath :: [String] -> Maybe FilePath

@@ -1,4 +1,4 @@
-module MongoDBAction(performAction) where
+module MongoDBAction(performAction, execute) where
 
 import DatabaseConfig
 import Hetzer
@@ -19,3 +19,6 @@ performAction action = do
     conf <- gets _database_conf
     result <- liftIO $ DB.access connection getAccessMode (pack $ database_name conf) action
     return result
+
+execute :: DB.Pipe -> Text -> DB.Action IO b -> IO b
+execute pipe db_name action = DB.access pipe getAccessMode db_name action

@@ -15,6 +15,7 @@ dependencies:
     - uuid
     - random
     - either-unwrap
+    - regex-tdfa
 
 executables:
     hetzer:

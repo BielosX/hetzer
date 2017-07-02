@@ -26,34 +26,37 @@ import System.Environment
 import Data.Maybe
 import Data.Either.Unwrap
 import Data.Aeson
+import Control.Monad.Trans.Except
+import Control.Monad.Except
 
 hetzerInit db_conf pipe = makeSnaplet "hetzer" "hetzer" Nothing $ do
     addRoutes (UR.handlers ++ BR.handlers)
     return $ Hetzer db_conf pipe
 
-getConfFilePath :: [String] -> Maybe FilePath
-getConfFilePath [] = Just "./hetzer_conf.json"
+getConfFilePath :: [String] -> Either String FilePath
+getConfFilePath [] = Right "./hetzer_conf.json"
 getConfFilePath (a:ax) | a == "--config" = getPath $ List.take 1 ax
                        | otherwise = getConfFilePath ax
 
-getPath :: [String] -> Maybe FilePath
-getPath [] = Nothing
-getPath (a:ax) = Just a
+getPath :: [String] -> Either String FilePath
+getPath [] = Left "Config file path is not specified."
+getPath (a:ax) = Right a
+
+runHetzer :: ExceptT String IO ()
+runHetzer = do
+    args <- liftIO $ getArgs
+    path <- toExceptT $ getConfFilePath args
+    content <- liftIO $ IO.readFile path
+    decoded <- toExceptT $ (eitherDecode :: LBS.ByteString -> Either String DatabaseConfig) $ BSC8.pack content
+    pipe <- liftIO $ connectDatabase decoded
+    liftIO $ serveSnaplet defaultConfig (hetzerInit decoded pipe)
+    liftIO $ DB.close pipe
 
 main :: IO ()
 main = do
-    args <- getArgs
-    path <- return $ getConfFilePath args
-    if (isJust path) then do
-        content <- IO.readFile (fromJust path)
-        decoded <- return $ (eitherDecode :: LBS.ByteString -> Either String DatabaseConfig) $ BSC8.pack content
-        if (isRight decoded) then do
-            db_conf <- return $ fromRight decoded
-            pipe <- connectDatabase db_conf
-            serveSnaplet defaultConfig (hetzerInit db_conf pipe)
-            DB.close pipe
-        else
-            IO.putStrLn $ fromLeft decoded
-    else
-        IO.putStrLn "Config file path is not specified."
+    error <- runExceptT runHetzer
+    either (\e -> putStrLn e) (\x -> return ()) error
 
+toExceptT :: Either String a -> ExceptT String IO a
+toExceptT (Right x) = lift $ (return :: a -> IO a) x
+toExceptT (Left x) = throwE x

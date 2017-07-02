@@ -16,6 +16,7 @@ dependencies:
     - random
     - either-unwrap
     - regex-tdfa
+    - transformers
 
 executables:
     hetzer:

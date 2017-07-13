@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p ./src"
+    "build": "tsc -p ./tsconfig.json",
+    "clean": "rm -r dist/*"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,15 @@
   },
   "homepage": "https://github.com/BielosX/hetzer#readme",
   "dependencies": {
-      "axios": "0.16.1"
+    "@types/react": "^15.0.38",
+    "@types/react-dom": "^15.5.1",
+    "axios": "0.16.1",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.2.1",
+    "source-map-loader": "^0.2.1",
+    "typescript": "^2.4.1"
   }
 }

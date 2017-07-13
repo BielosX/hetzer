@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/BielosX/hetzer#readme",
   "dependencies": {
+    "@types/axios": "^0.14.0",
     "@types/react": "^15.0.38",
     "@types/react-dom": "^15.5.1",
     "axios": "0.16.1",

@@ -37,7 +37,7 @@ class NavbarButton extends React.Component<any,any> {
 
 const LeftPanel = (props) => {
     return (
-        <div className="col-sm-3 sidebar">
+        <div className="col-sm-3 col-md-2 sidebar">
             <ul className="nav nav-sidebar">
                 {props.children}
             </ul>
@@ -47,7 +47,7 @@ const LeftPanel = (props) => {
 
 const CenterPanel = (props) => {
     return (
-        <div className="col-sm-9 col-sm-offset-3 main">{props.children}</div>
+        <div className="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">{props.children}</div>
     );
 }
 

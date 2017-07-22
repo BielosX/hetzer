@@ -5,7 +5,7 @@ const Navbar = (props) => {
         <nav className="navbar navbar-inverse navbar-static-top">
             <div className="container">
                 <div id="navbar" className="navbar-collapse collapse">
-                    <ul className="nav navbar-nav">
+                    <ul className="nav navbar-nav navbar-right">
                         {props.children}
                     </ul>
                 </div>
@@ -37,29 +37,35 @@ class NavbarButton extends React.Component<any,any> {
 
 const LeftPanel = (props) => {
     return (
-        <div className="col-sm-4">{props.children}</div>
+        <div className="col-sm-3 sidebar">
+            <ul className="nav nav-sidebar">
+                {props.children}
+            </ul>
+        </div>
     );
 }
 
 const CenterPanel = (props) => {
     return (
-        <div className="col-sm-8">{props.children}</div>
+        <div className="col-sm-9 col-sm-offset-3 main">{props.children}</div>
     );
 }
 
 const SearchInput = (props) => {
     return (
-        <form>
-            <div className="input-group">
-            <input type="text" className="form-control" placeholder={props.placeholder}/>
-            </div>
-        </form>
+        <li>
+            <form>
+                <div className="input-group">
+                <input type="text" className="form-control" placeholder={props.placeholder}/>
+                </div>
+            </form>
+        </li>
     );
 }
 
 const Main = (props) => {
     return (
-        <div className="container">
+        <div className="container-fluid">
             <div className="row">{props.children}</div>
         </div>
     );
@@ -74,8 +80,12 @@ export const App = () => {
             <Main>
                 <LeftPanel>
                     <SearchInput placeholder="Search" />
+                    <li className="active">
+                        <a>Fantasy</a>
+                    </li>
                 </LeftPanel>
                 <CenterPanel>
+                    <h1 className="page-header">Books</h1>
                 </CenterPanel>
             </Main>
         </div>

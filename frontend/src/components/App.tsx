@@ -55,8 +55,8 @@ const SearchInput = (props) => {
     return (
         <li>
             <form>
-                <div className="input-group">
-                <input type="text" className="form-control" placeholder={props.placeholder}/>
+                <div className="input-group nav-search">
+                    <input type="text" className="form-control" placeholder={props.placeholder}/>
                 </div>
             </form>
         </li>

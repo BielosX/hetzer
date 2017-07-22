@@ -22,6 +22,14 @@
     }
 }
 
+.nav-search {
+    box-sizing: border-box;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
 /* Sidebar navigation */
 .nav-sidebar {
     margin-right: -21px; /* 20px padding + 1px border */

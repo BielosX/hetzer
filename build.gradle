@@ -13,3 +13,18 @@ task copyConfig(type: Copy) {
     into 'target'
     include 'hetzer_conf.json'
 }
+
+task copyCss(type: Copy) {
+    from 'frontend'
+    into 'target'
+    include '*.css'
+}
+
+task copyIndex(type: Copy) {
+    from 'frontend'
+    into 'target'
+    include 'index.html'
+}
+
+task install
+install.dependsOn copyCss,copyIndex,copyConfig,installHetzer

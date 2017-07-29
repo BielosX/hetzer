@@ -1,5 +1,7 @@
 task createTargetDir {
     new File('target').mkdirs()
+    new File('target/css').mkdirs()
+    new File('target/dist').mkdirs()
 }
 
 task buildHetzer(type: Exec) {
@@ -20,7 +22,7 @@ task copyConfig(dependsOn: createTargetDir, type: Copy) {
 
 task copyCss(dependsOn: createTargetDir, type: Copy) {
     from 'frontend'
-    into 'target'
+    into 'target/css'
     include '*.css'
 }
 
@@ -36,10 +38,30 @@ task npmInstall(type: Exec) {
     args = ['install']
 }
 
+task webpack(type: Exec) {
+    workingDir 'frontend'
+    executable = 'webpack'
+}
+
+task copyReact(dependsOn: npmInstall, type: Copy) {
+    from 'frontend/node_modules/react/dist/react.js'
+    into 'target/dist'
+}
+
+task copyReactDom(dependsOn: npmInstall, type: Copy) {
+    from 'frontend/node_modules/react-dom/dist/react-dom.js'
+    into 'target/dist'
+}
+
 task copyBootstrapCss(dependsOn: [npmInstall, createTargetDir], type: Copy) {
     from 'frontend/node_modules/bootstrap/dist/css'
-    into 'target'
+    into 'target/css'
     include '*.css'
+}
+
+task copyBundle(dependsOn: [createTargetDir, webpack], type: Copy) {
+    from 'frontend/dist'
+    into 'target/dist'
 }
 
 task run(dependsOn: createTargetDir, type: Exec) {
@@ -57,5 +79,5 @@ task clean(type: Delete) {
 }
 
 task install
-install.dependsOn copyCss,copyIndex,copyConfig,installHetzer, copyBootstrapCss
+install.dependsOn copyCss,copyIndex,copyConfig,installHetzer,copyBootstrapCss, copyBundle, copyReact, copyReactDom
 

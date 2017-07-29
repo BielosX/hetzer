@@ -31,7 +31,9 @@ import Control.Monad.Except
 import Snap.Util.FileServe
 
 root = [
-        ("/", serveFile "index.html")
+        ("/", serveFile "index.html"),
+        ("/dist", serveDirectory "dist"),
+        ("/css", serveDirectory "css")
     ]
 
 hetzerInit db_conf pipe = makeSnaplet "hetzer" "hetzer" Nothing $ do

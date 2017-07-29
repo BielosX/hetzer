@@ -28,9 +28,14 @@ import Data.Either.Unwrap
 import Data.Aeson
 import Control.Monad.Trans.Except
 import Control.Monad.Except
+import Snap.Util.FileServe
+
+root = [
+        ("/", serveFile "index.html")
+    ]
 
 hetzerInit db_conf pipe = makeSnaplet "hetzer" "hetzer" Nothing $ do
-    addRoutes (UR.handlers ++ BR.handlers)
+    addRoutes (UR.handlers ++ BR.handlers ++ root)
     return $ Hetzer db_conf pipe
 
 getConfFilePath :: [String] -> Either String FilePath

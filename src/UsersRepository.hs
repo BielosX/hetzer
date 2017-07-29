@@ -24,7 +24,6 @@ import Data.List
 
 handlers :: [(ByteString, Handler Hetzer Hetzer ())]
 handlers = [
-            ("/", writeBS "Hetzer"),
             ("users", method POST addNewUser),
             ("users", method GET getUsers),
             ("users/:userId", method GET getUser)

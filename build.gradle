@@ -1,26 +1,30 @@
+task createTargetDir {
+    new File('target').mkdirs()
+}
+
 task buildHetzer(type: Exec) {
     executable = 'stack'
     args = ['build']
 }
 
-task installHetzer(dependsOn: buildHetzer, type: Exec) {
+task installHetzer(dependsOn: [buildHetzer, createTargetDir], type: Exec) {
     executable = 'stack'
     args = ['install', '--local-bin-path', 'target']
 }
 
-task copyConfig(type: Copy) {
+task copyConfig(dependsOn: createTargetDir, type: Copy) {
     from 'config'
     into 'target'
     include 'hetzer_conf.json'
 }
 
-task copyCss(type: Copy) {
+task copyCss(dependsOn: createTargetDir, type: Copy) {
     from 'frontend'
     into 'target'
     include '*.css'
 }
 
-task copyIndex(type: Copy) {
+task copyIndex(dependsOn: createTargetDir, type: Copy) {
     from 'frontend'
     into 'target'
     include 'index.html'
@@ -32,13 +36,13 @@ task npmInstall(type: Exec) {
     args = ['install']
 }
 
-task copyBootstrapCss(dependsOn: npmInstall, type: Copy) {
+task copyBootstrapCss(dependsOn: [npmInstall, createTargetDir], type: Copy) {
     from 'frontend/node_modules/bootstrap/dist/css'
     into 'target'
     include '*.css'
 }
 
-task run(type: Exec) {
+task run(dependsOn: createTargetDir, type: Exec) {
     if (file('target/hetzer').exists()) {
         workingDir './target'
         commandLine 'hetzer'
@@ -46,6 +50,10 @@ task run(type: Exec) {
     else {
         println 'Executable file does not exist. Run build first.'
     }
+}
+
+task clean(type: Delete) {
+    delete 'target'
 }
 
 task install

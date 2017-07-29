@@ -1,0 +1,15 @@
+task buildHetzer(type: Exec) {
+    executable = 'stack'
+    args = ['build']
+}
+
+task installHetzer(dependsOn: buildHetzer, type: Exec) {
+    executable = 'stack'
+    args = ['install', '--local-bin-path', 'target']
+}
+
+task copyConfig(type: Copy) {
+    from 'config'
+    into 'target'
+    include 'hetzer_conf.json'
+}

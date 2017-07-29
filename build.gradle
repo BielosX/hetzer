@@ -26,5 +26,28 @@ task copyIndex(type: Copy) {
     include 'index.html'
 }
 
+task npmInstall(type: Exec) {
+    workingDir 'frontend'
+    executable = 'npm'
+    args = ['install']
+}
+
+task copyBootstrapCss(dependsOn: npmInstall, type: Copy) {
+    from 'frontend/node_modules/bootstrap/dist/css'
+    into 'target'
+    include '*.css'
+}
+
+task run(type: Exec) {
+    if (file('target/hetzer').exists()) {
+        workingDir './target'
+        commandLine 'hetzer'
+    }
+    else {
+        println 'Executable file does not exist. Run build first.'
+    }
+}
+
 task install
-install.dependsOn copyCss,copyIndex,copyConfig,installHetzer
+install.dependsOn copyCss,copyIndex,copyConfig,installHetzer, copyBootstrapCss
+

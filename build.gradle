@@ -1,3 +1,17 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
+    }
+}
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
 task createTargetDir {
     new File('target').mkdirs()
     new File('target/css').mkdirs()
@@ -64,16 +78,6 @@ task copyBundle(dependsOn: [createTargetDir, webpack], type: Copy) {
     into 'target/dist'
 }
 
-task run(dependsOn: createTargetDir, type: Exec) {
-    if (file('target/hetzer').exists()) {
-        workingDir './target'
-        commandLine 'hetzer'
-    }
-    else {
-        println 'Executable file does not exist. Run build first.'
-    }
-}
-
 task clean(type: Delete) {
     delete 'target'
 }
@@ -81,3 +85,20 @@ task clean(type: Delete) {
 task install
 install.dependsOn copyCss,copyIndex,copyConfig,installHetzer,copyBootstrapCss, copyBundle, copyReact, copyReactDom
 
+task createDockerFile(dependsOn: install, type: Dockerfile) {
+    destFile = project.file('target/Dockerfile')
+    from 'debian:stretch'
+    runCommand('apt-get update')
+    runCommand('apt-get install -y libgmp-dev')
+    workingDir('/hetzer')
+    copyFile('hetzer_conf.json', './hetzer_conf.json')
+    copyFile('css', './css')
+    copyFile('dist', './dist')
+    copyFile('hetzer', './')
+    entryPoint('./hetzer', '--config', 'hetzer_conf.json')
+}
+
+task buildImage(dependsOn: createDockerFile, type: DockerBuildImage) {
+    inputDir = createDockerFile.destFile.parentFile
+    tag = 'hetzer'
+}

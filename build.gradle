@@ -94,8 +94,9 @@ task createDockerFile(dependsOn: install, type: Dockerfile) {
     copyFile('hetzer_conf.json', './hetzer_conf.json')
     copyFile('css', './css')
     copyFile('dist', './dist')
+    copyFile('index.html', './')
     copyFile('hetzer', './')
-    entryPoint('./hetzer', '--config', 'hetzer_conf.json')
+    entryPoint('./hetzer')
 }
 
 task buildImage(dependsOn: createDockerFile, type: DockerBuildImage) {

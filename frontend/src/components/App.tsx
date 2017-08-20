@@ -71,23 +71,30 @@ const Main = (props) => {
     );
 }
 
-export const App = () => {
-    return (
-        <div>
-            <Navbar>
-                <NavbarButton>Home</NavbarButton>
-            </Navbar>
-            <Main>
-                <LeftPanel>
-                    <SearchInput placeholder="Search" />
-                    <li className="active">
-                        <a>Fantasy</a>
-                    </li>
-                </LeftPanel>
-                <CenterPanel>
-                    <h1 className="page-header">Books</h1>
-                </CenterPanel>
-            </Main>
-        </div>
-    );
+export class App extends React.Component<any,any> {
+
+    componentDidMount() {
+        console.log('app initialized')
+    }
+
+    render() {
+        return (
+            <div>
+                <Navbar>
+                    <NavbarButton>Home</NavbarButton>
+                </Navbar>
+                <Main>
+                    <LeftPanel>
+                        <SearchInput placeholder="Search" />
+                        <li className="active">
+                            <a>Fantasy</a>
+                        </li>
+                    </LeftPanel>
+                    <CenterPanel>
+                        <h1 className="page-header">Books</h1>
+                    </CenterPanel>
+                </Main>
+            </div>
+        );
+    }
 }

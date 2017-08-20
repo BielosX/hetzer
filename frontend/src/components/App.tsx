@@ -1,4 +1,5 @@
 import * as React from "react";
+import axios from "axios";
 
 const Navbar = (props) => {
     return (
@@ -73,8 +74,21 @@ const Main = (props) => {
 
 export class App extends React.Component<any,any> {
 
+    constructor(props) {
+        super(props);
+        this.state = {generes: []};
+    }
+
     componentDidMount() {
-        console.log('app initialized')
+        axios.get('books')
+        .then((response) => {
+            this.setState({
+                generes: Array.from(new Set(response.data.map(book => book.genere)))
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+        });
     }
 
     render() {
@@ -86,9 +100,10 @@ export class App extends React.Component<any,any> {
                 <Main>
                     <LeftPanel>
                         <SearchInput placeholder="Search" />
-                        <li className="active">
-                            <a>Fantasy</a>
-                        </li>
+                        <li><h3>Generes:</h3></li>
+                        {this.state.generes.map(genere => (
+                            <li><a>{genere}</a></li>
+                        )).sort()}
                     </LeftPanel>
                     <CenterPanel>
                         <h1 className="page-header">Books</h1>

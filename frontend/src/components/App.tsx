@@ -72,18 +72,45 @@ const Main = (props) => {
     );
 }
 
+const BooksList = (props) => {
+    return (
+        <table className="table">
+            <thead>
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">Genere</th>
+                    <th scope="col">Published</th>
+                    <th scope="col">In stock</th>
+                </tr>
+            </thead>
+            <tbody>
+            {props.books.map(book => (
+                <tr key={book.id}>
+                    <td>{book.title}</td>
+                    <td>{book.author}</td>
+                    <td>{book.genere}</td>
+                    <td>{book.published}</td>
+                    <td>{book.left}</td>
+                </tr>
+            ))}
+            </tbody>
+        </table>
+    );
+}
+
 export class App extends React.Component<any,any> {
 
     constructor(props) {
         super(props);
-        this.state = {generes: []};
+        this.state = {books: []};
     }
 
     componentDidMount() {
         axios.get('books')
         .then((response) => {
             this.setState({
-                generes: Array.from(new Set(response.data.map(book => book.genere)))
+                books: response.data
             });
         })
         .catch((error) => {
@@ -100,13 +127,10 @@ export class App extends React.Component<any,any> {
                 <Main>
                     <LeftPanel>
                         <SearchInput placeholder="Search" />
-                        <li><h3>Generes:</h3></li>
-                        {this.state.generes.map(genere => (
-                            <li><a>{genere}</a></li>
-                        )).sort()}
                     </LeftPanel>
                     <CenterPanel>
                         <h1 className="page-header">Books</h1>
+                        <BooksList books={this.state.books} />
                     </CenterPanel>
                 </Main>
             </div>

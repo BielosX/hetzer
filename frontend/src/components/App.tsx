@@ -99,6 +99,43 @@ const BooksList = (props) => {
     );
 }
 
+const FilterOption = (props) => {
+    return (
+        <li>
+            <div className="input-group nav-search">
+                <label>
+                    <input type="checkbox" value={props.value} checked={props.checked} onClick={props.onClick} />
+                    {props.filterName}
+                </label>
+            </div>
+        </li>
+    );
+}
+
+class Filter extends React.Component<any,any> {
+    constructor(props) {
+        super(props);
+        this.state = {filters: []};
+    }
+
+    componentWillReceiveProps(nextProps) {
+        var values = nextProps.filters.map(value => ({filter: value, applied: false}) );
+        console.log(values);
+        this.setState({
+            filters: values
+        });
+    }
+
+    render() {
+        return (
+            <div>
+                {this.state.filters.map((filter, index) => (
+                    <FilterOption key={index} value={filter.filter} filterName={filter.filter} checked={filter.applied} /> ))}
+            </div>
+        );
+    }
+}
+
 export class App extends React.Component<any,any> {
 
     constructor(props) {
@@ -127,6 +164,7 @@ export class App extends React.Component<any,any> {
                 <Main>
                     <LeftPanel>
                         <SearchInput placeholder="Search" />
+                        <Filter filters={this.state.books.map(book => book.genere)} />
                     </LeftPanel>
                     <CenterPanel>
                         <h1 className="page-header">Books</h1>

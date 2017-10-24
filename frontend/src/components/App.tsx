@@ -104,7 +104,7 @@ const FilterOption = (props) => {
         <li>
             <div className="input-group nav-search">
                 <label>
-                    <input type="checkbox" value={props.value} checked={props.checked} onClick={props.onClick} />
+                    <input type="checkbox" value={props.value} checked={props.checked} onClick={() => props.onClick(props.value)} />
                     {props.filterName}
                 </label>
             </div>
@@ -112,17 +112,33 @@ const FilterOption = (props) => {
     );
 }
 
+function removeDuplicates(array) {
+    return Array.from(new Set(array));
+}
+
 class Filter extends React.Component<any,any> {
     constructor(props) {
         super(props);
         this.state = {filters: []};
+        this.onCheckboxClick = this.onCheckboxClick.bind(this);
     }
 
     componentWillReceiveProps(nextProps) {
-        var values = nextProps.filters.map(value => ({filter: value, applied: false}) );
-        console.log(values);
+        var values = removeDuplicates(nextProps.filters).map(value => ({filter: value, applied: false}));
         this.setState({
             filters: values
+        });
+    }
+
+    onCheckboxClick(filterType) {
+        var newState = this.state.filters.map(filter => {
+            if (filter.filter === filterType) {
+                return ({filter: filter.filter, applied: !filter.applied});
+            }
+            return filter;
+        });
+        this.setState({
+            filters: newState
         });
     }
 
@@ -130,7 +146,7 @@ class Filter extends React.Component<any,any> {
         return (
             <div>
                 {this.state.filters.map((filter, index) => (
-                    <FilterOption key={index} value={filter.filter} filterName={filter.filter} checked={filter.applied} /> ))}
+                    <FilterOption key={index} value={filter.filter} onClick={this.onCheckboxClick} filterName={filter.filter} checked={filter.applied} /> ))}
             </div>
         );
     }

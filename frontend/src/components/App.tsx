@@ -124,7 +124,13 @@ class Filter extends React.Component<any,any> {
     }
 
     componentWillReceiveProps(nextProps) {
-        var values = removeDuplicates(nextProps.filters).map(value => ({filter: value, applied: false}));
+        var currentFilters = new Map(this.state.filters.map(filter => [filter.filter, filter.applied]));
+        var values = removeDuplicates(nextProps.filters).map(value => {
+            if (currentFilters.has(value)) {
+                return {filter: value, applied: currentFilters.get(value)};
+            }
+            return {filter: value, applied: false};
+        });
         this.setState({
             filters: values
         });
@@ -133,12 +139,14 @@ class Filter extends React.Component<any,any> {
     onCheckboxClick(filterType) {
         var newState = this.state.filters.map(filter => {
             if (filter.filter === filterType) {
-                return ({filter: filter.filter, applied: !filter.applied});
+                return ({...filter, applied: !filter.applied});
             }
             return filter;
         });
         this.setState({
             filters: newState
+        }, function() {
+            this.props.onFiltersChange(this.state.filters.filter(f => f.applied).map(f => f.filter));
         });
     }
 
@@ -156,19 +164,37 @@ export class App extends React.Component<any,any> {
 
     constructor(props) {
         super(props);
-        this.state = {books: []};
+        this.state = {books: [], filteredBooks: []};
+        this.onFiltersChange = this.onFiltersChange.bind(this);
     }
 
     componentDidMount() {
         axios.get('books')
         .then((response) => {
             this.setState({
-                books: response.data
+                books: response.data,
+                filteredBooks: response.data
             });
         })
         .catch((error) => {
             console.log(error);
         });
+    }
+
+    onFiltersChange(activeFilters) {
+        var books = this.state.books;
+        if (activeFilters.length > 0) {
+            this.setState({
+                ...this.state,
+                filteredBooks: books.filter(book => activeFilters.includes(book.genere))
+            });
+        }
+        else {
+            this.setState({
+                ...this.state,
+                filteredBooks: books
+            });
+        }
     }
 
     render() {
@@ -180,11 +206,11 @@ export class App extends React.Component<any,any> {
                 <Main>
                     <LeftPanel>
                         <SearchInput placeholder="Search" />
-                        <Filter filters={this.state.books.map(book => book.genere)} />
+                        <Filter onFiltersChange={this.onFiltersChange} filters={this.state.books.map(book => book.genere)} />
                     </LeftPanel>
                     <CenterPanel>
                         <h1 className="page-header">Books</h1>
-                        <BooksList books={this.state.books} />
+                        <BooksList books={this.state.filteredBooks} />
                     </CenterPanel>
                 </Main>
             </div>

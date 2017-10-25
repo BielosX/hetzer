@@ -2,3 +2,9 @@
 log/
 .stack-work/
 .gradle
+
+frontend/package-lock.json
+frontend/src/components/*.swp
+node_modules
+package-lock.json
+target

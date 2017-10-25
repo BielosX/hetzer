@@ -5,6 +5,7 @@ import { Filter } from "./Filter";
 import { BooksList } from "./BooksList"
 import { Navbar } from "./Navbar"
 import { NavbarButton } from "./NavbarButton"
+import { SearchInput } from "./SearchInput"
 
 const LeftPanel = (props) => {
     return (
@@ -19,18 +20,6 @@ const LeftPanel = (props) => {
 const CenterPanel = (props) => {
     return (
         <div className="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">{props.children}</div>
-    );
-}
-
-const SearchInput = (props) => {
-    return (
-        <li>
-            <form>
-                <div className="input-group nav-search">
-                    <input type="text" className="form-control" placeholder={props.placeholder}/>
-                </div>
-            </form>
-        </li>
     );
 }
 

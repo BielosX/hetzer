@@ -25,7 +25,7 @@ export class BooksView extends React.Component<any,any> {
 
     constructor(props) {
         super(props);
-        this.state = {books: [], filteredBooks: []};
+        this.state = {books: []};
         this.onFiltersChange = this.onFiltersChange.bind(this);
     }
 
@@ -33,8 +33,7 @@ export class BooksView extends React.Component<any,any> {
         axios.get('books')
         .then((response) => {
             this.setState({
-                books: response.data,
-                filteredBooks: response.data
+                books: response.data.map(book => ( {data: book, visible: true} ))
             });
         })
         .catch((error) => {
@@ -46,14 +45,17 @@ export class BooksView extends React.Component<any,any> {
         var books = this.state.books;
         if (activeFilters.length > 0) {
             this.setState({
-                ...this.state,
-                filteredBooks: books.filter(book => activeFilters.includes(book.genere))
+                books: books.map(book => {
+                    if (activeFilters.includes(book.data.genere)) {
+                        return {...book, visible: true};
+                    }
+                    return {...book, visible: false};
+                })
             });
         }
         else {
             this.setState({
-                ...this.state,
-                filteredBooks: books
+                books: books.map(book => ( {...book, visible: true} ))
             });
         }
     }
@@ -63,11 +65,11 @@ export class BooksView extends React.Component<any,any> {
             <div>
                 <LeftPanel>
                     <SearchInput placeholder="Search" />
-                    <Filter onFiltersChange={this.onFiltersChange} filters={this.state.books.map(book => book.genere)} />
+                    <Filter onFiltersChange={this.onFiltersChange} filters={this.state.books.map(book => book.data.genere)} />
                 </LeftPanel>
                 <CenterPanel>
                     <h1 className="page-header">Books</h1>
-                    <BooksList books={this.state.filteredBooks} />
+                    <BooksList books={this.state.books.filter(book => book.visible).map(book => book.data)} />
                 </CenterPanel>
             </div>
         );

@@ -3,41 +3,8 @@ import axios from "axios";
 
 import { Filter } from "./Filter";
 import { BooksList } from "./BooksList"
-
-const Navbar = (props) => {
-    return (
-        <nav className="navbar navbar-inverse navbar-static-top">
-            <div className="container">
-                <div id="navbar" className="navbar-collapse collapse">
-                    <ul className="nav navbar-nav navbar-right">
-                        {props.children}
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    );
-}
-
-class NavbarButton extends React.Component<any,any> {
-    constructor(props) {
-        super(props);
-        this.state = {isActive: false};
-    }
-
-    render() {
-        const isActive = this.state.isActive;
-        if (isActive) {
-            return (
-                <li className="active">
-                        <a>{this.props.children}</a>
-                </li>
-            );
-        }
-        else {
-            return <li><a>{this.props.children}</a></li>
-        }
-    }
-}
+import { Navbar } from "./Navbar"
+import { NavbarButton } from "./NavbarButton"
 
 const LeftPanel = (props) => {
     return (

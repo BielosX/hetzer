@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 
 export class NavbarButton extends React.Component<any,any> {
     constructor(props) {
@@ -11,12 +12,14 @@ export class NavbarButton extends React.Component<any,any> {
         if (isActive) {
             return (
                 <li className="active">
-                        <a>{this.props.children}</a>
+                    <Link to={this.props.link}>
+                        {this.props.children}
+                    </Link>
                 </li>
             );
         }
         else {
-            return <li><a>{this.props.children}</a></li>
+            return <li><Link to={this.props.link}>{this.props.children}</Link></li>
         }
     }
 }

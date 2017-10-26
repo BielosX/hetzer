@@ -5,6 +5,7 @@ import { Route, BrowserRouter } from "react-router-dom";
 import { BooksView } from "./BooksView"
 import { Navbar } from "./Navbar"
 import { NavbarButton } from "./NavbarButton"
+import { BooksForm } from "./BooksForm"
 
 const Main = (props) => {
     return (
@@ -21,9 +22,11 @@ export const App = (props) => {
                     <Navbar>
                         <NavbarButton link="/">Home</NavbarButton>
                         <NavbarButton link="/books">Books</NavbarButton>
+                        <NavbarButton link="/addBook">Add book</NavbarButton>
                     </Navbar>
                     <Main>
                         <Route path="/books" exact={true} component={BooksView} />
+                        <Route path="/addBook" exact={true} component={BooksForm} />
                     </Main>
                 </div>
             </BrowserRouter>

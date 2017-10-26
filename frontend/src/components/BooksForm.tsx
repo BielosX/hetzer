@@ -43,7 +43,7 @@ export class BooksForm extends React.Component<any,any> {
         const name = target.name;
         var value;
 
-        if (name === "quantity" || name == "left") {
+        if (name === "quantity" || name === "left") {
             value = parseInt(target.value)
         }
         else {

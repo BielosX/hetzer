@@ -59,10 +59,10 @@ loadUser (Just param) = do
 loadUser Nothing = writeBS "userId is not specified"
 
 returnDocument :: [DB.Document] -> Handler Hetzer Hetzer ()
-returnDocument (a:ax) = writeLBS $ encode $ userFromDocument a
+returnDocument (a:ax) = writeLBS $ encode $ (userFromDocument a) {User.password = Nothing}
 returnDocument [] = writeBS "user does not exist"
 
 getUsers :: Handler Hetzer Hetzer ()
 getUsers = do
     documents <- performAction $ (DB.find (DB.select [] "users") >>= DB.rest)
-    writeLBS $ encode $ liftToJSON toJSON toJSON $ Data.List.map userFromDocument documents
+    writeLBS $ encode $ liftToJSON toJSON toJSON $ Data.List.map (\d -> (userFromDocument d) {User.password = Nothing}) documents

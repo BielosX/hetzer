@@ -9,6 +9,7 @@ import UserConverter
 
 import qualified Database.MongoDB as DB
 import qualified Data.ByteString.Lazy as BS
+import qualified Data.ByteString.Char8 as C
 
 import Data.Aeson
 import System.Random
@@ -21,6 +22,7 @@ import Control.Monad.IO.Class
 import Data.Maybe
 import Data.ByteString
 import Data.List
+import Crypto.BCrypt
 
 handlers :: [(ByteString, Handler Hetzer Hetzer ())]
 handlers = [
@@ -38,8 +40,12 @@ addNewUser = do
 insertUser :: User -> Handler Hetzer Hetzer ()
 insertUser user = do
     uuid <- liftIO $ randomIO
-    performAction $ DB.insert "users" $ userToDocument $ user {User.id = Just uuid}
-    return ()
+    encryptedPasswd <- liftIO $ hashPasswordUsingPolicy fastBcryptHashingPolicy (C.pack $ fromMaybe "" $ password user)
+    if isJust encryptedPasswd then do
+        performAction $ DB.insert "users" $ userToDocument $ user {User.id = Just uuid, User.password = (fmap C.unpack encryptedPasswd)}
+        return ()
+    else
+        return ()
 
 getUser :: Handler Hetzer Hetzer ()
 getUser = do

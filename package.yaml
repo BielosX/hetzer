@@ -17,6 +17,7 @@ dependencies:
     - either-unwrap
     - regex-tdfa
     - transformers
+    - bcrypt
 
 executables:
     hetzer:

@@ -11,7 +11,8 @@ import Data.UUID
 data User = User {
                     id :: Maybe UUID,
                     name :: String,
-                    email :: String
+                    email :: String,
+                    password :: Maybe String
                 } deriving (Show, Generic)
 
 instance FromJSON User where

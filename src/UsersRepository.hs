@@ -65,4 +65,7 @@ returnDocument [] = writeBS "user does not exist"
 getUsers :: Handler Hetzer Hetzer ()
 getUsers = do
     documents <- performAction $ (DB.find (DB.select [] "users") >>= DB.rest)
-    writeLBS $ encode $ liftToJSON toJSON toJSON $ Data.List.map (\d -> (userFromDocument d) {User.password = Nothing}) documents
+    writeLBS $ encode $ liftToJSON toJSON toJSON $ Data.List.map (hideUsersPassword . userFromDocument) documents
+
+hideUsersPassword :: User -> User
+hideUsersPassword user = user {User.password = Nothing}

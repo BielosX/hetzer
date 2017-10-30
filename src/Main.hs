@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
+import HetzerConfig
 import DatabaseConfig
 import Hetzer
 
@@ -54,9 +55,9 @@ runHetzer = do
     args <- liftIO $ getArgs
     path <- toExceptT $ getConfFilePath args
     content <- liftIO $ IO.readFile path
-    decoded <- toExceptT $ (eitherDecode :: LBS.ByteString -> Either String DatabaseConfig) $ BSC8.pack content
-    pipe <- liftIO $ connectDatabase decoded
-    liftIO $ serveSnaplet defaultConfig (hetzerInit decoded pipe)
+    decoded <- toExceptT $ (eitherDecode :: LBS.ByteString -> Either String HetzerConfig) $ BSC8.pack content
+    pipe <- liftIO $ connectDatabase (mongo decoded)
+    liftIO $ serveSnaplet defaultConfig (hetzerInit (mongo decoded) pipe)
     liftIO $ DB.close pipe
 
 main :: IO ()

@@ -1,4 +1,9 @@
 {
-    "database_addr": "mongo",
-    "database_name": "my_database"
+    "mongo": {
+        "database_addr": "mongo",
+        "database_name": "my_database"
+    },
+    "redis": {
+        "addr": "redis"
+    }
 }

@@ -18,6 +18,7 @@ dependencies:
     - regex-tdfa
     - transformers
     - bcrypt
+    - hedis
 
 executables:
     hetzer:

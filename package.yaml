@@ -19,6 +19,7 @@ dependencies:
     - transformers
     - bcrypt
     - hedis
+    - jose
 
 executables:
     hetzer:

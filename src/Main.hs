@@ -7,8 +7,10 @@ import Hetzer
 
 import qualified UsersRepository as UR
 import qualified BooksResource as BR
+import qualified RedisConfig as RC
 
 import qualified Database.MongoDB as DB
+import qualified Database.Redis as Redis
 import qualified Data.List as List
 import qualified System.IO as IO
 import qualified Data.ByteString.Lazy.Char8 as BSC8
@@ -37,9 +39,9 @@ root = [
         ("/css", serveDirectory "css")
     ]
 
-hetzerInit db_conf pipe = makeSnaplet "hetzer" "hetzer" Nothing $ do
+hetzerInit db_conf pipe redis_conn = makeSnaplet "hetzer" "hetzer" Nothing $ do
     addRoutes (UR.handlers ++ BR.handlers ++ root)
-    return $ Hetzer db_conf pipe
+    return $ Hetzer db_conf pipe redis_conn
 
 getConfFilePath :: [String] -> Either String FilePath
 getConfFilePath [] = Right "./hetzer_conf.json"
@@ -57,8 +59,11 @@ runHetzer = do
     content <- liftIO $ IO.readFile path
     decoded <- toExceptT $ (eitherDecode :: LBS.ByteString -> Either String HetzerConfig) $ BSC8.pack content
     pipe <- liftIO $ connectDatabase (mongo decoded)
-    liftIO $ serveSnaplet defaultConfig (hetzerInit (mongo decoded) pipe)
+    redisConn <- liftIO $ Redis.checkedConnect (redisConnectInfo $ RC.addr $ redis decoded)
+    liftIO $ serveSnaplet defaultConfig (hetzerInit (mongo decoded) pipe redisConn)
     liftIO $ DB.close pipe
+    liftIO $ Redis.runRedis redisConn $ Redis.quit
+    return ()
 
 main :: IO ()
 main = do
@@ -68,3 +73,6 @@ main = do
 toExceptT :: Either String a -> ExceptT String IO a
 toExceptT (Right x) = lift $ (return :: a -> IO a) x
 toExceptT (Left x) = throwE x
+
+redisConnectInfo :: String -> Redis.ConnectInfo
+redisConnectInfo host = Redis.defaultConnectInfo { Redis.connectHost = host }

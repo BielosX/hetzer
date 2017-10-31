@@ -20,6 +20,7 @@ dependencies:
     - bcrypt
     - hedis
     - jose
+    - io-streams
 
 executables:
     hetzer:

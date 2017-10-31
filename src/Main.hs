@@ -4,11 +4,13 @@ module Main where
 import HetzerConfig
 import DatabaseConfig
 import Hetzer
+import WebToken
 
 import qualified UsersRepository as UR
 import qualified BooksResource as BR
-import qualified RedisConfig as RC
+import qualified LogIn as LI
 
+import qualified RedisConfig as RC
 import qualified Database.MongoDB as DB
 import qualified Database.Redis as Redis
 import qualified Data.List as List
@@ -40,7 +42,7 @@ root = [
     ]
 
 hetzerInit db_conf pipe redis_conn = makeSnaplet "hetzer" "hetzer" Nothing $ do
-    addRoutes (UR.handlers ++ BR.handlers ++ root)
+    addRoutes (UR.handlers ++ BR.handlers ++ LI.handlers ++ root)
     return $ Hetzer db_conf pipe redis_conn
 
 getConfFilePath :: [String] -> Either String FilePath
@@ -76,3 +78,4 @@ toExceptT (Left x) = throwE x
 
 redisConnectInfo :: String -> Redis.ConnectInfo
 redisConnectInfo host = Redis.defaultConnectInfo { Redis.connectHost = host }
+

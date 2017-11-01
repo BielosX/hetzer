@@ -34,6 +34,7 @@ import Data.Aeson
 import Control.Monad.Trans.Except
 import Control.Monad.Except
 import Snap.Util.FileServe
+import Crypto.JOSE.JWK
 
 root = [
         ("/", serveFile "index.html"),
@@ -41,9 +42,9 @@ root = [
         ("/css", serveDirectory "css")
     ]
 
-hetzerInit db_conf pipe redis_conn = makeSnaplet "hetzer" "hetzer" Nothing $ do
+hetzerInit db_conf pipe redis_conn jwk = makeSnaplet "hetzer" "hetzer" Nothing $ do
     addRoutes (UR.handlers ++ BR.handlers ++ LI.handlers ++ root)
-    return $ Hetzer db_conf pipe redis_conn
+    return $ Hetzer db_conf pipe redis_conn jwk
 
 getConfFilePath :: [String] -> Either String FilePath
 getConfFilePath [] = Right "./hetzer_conf.json"
@@ -62,7 +63,8 @@ runHetzer = do
     decoded <- toExceptT $ (eitherDecode :: LBS.ByteString -> Either String HetzerConfig) $ BSC8.pack content
     pipe <- liftIO $ connectDatabase (mongo decoded)
     redisConn <- liftIO $ Redis.checkedConnect (redisConnectInfo $ RC.addr $ redis decoded)
-    liftIO $ serveSnaplet defaultConfig (hetzerInit (mongo decoded) pipe redisConn)
+    jwk  <- liftIO $ genJWK (RSAGenParam 512)
+    liftIO $ serveSnaplet defaultConfig (hetzerInit (mongo decoded) pipe redisConn jwk)
     liftIO $ DB.close pipe
     liftIO $ Redis.runRedis redisConn $ Redis.quit
     return ()

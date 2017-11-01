@@ -1,11 +1,11 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 module LogIn(handlers) where
-
 import Hetzer
 import UserPasswd
 import MongoDBAction
 import UserConverter
+import WebToken
 
 import qualified Database.MongoDB as DB
 import qualified Data.ByteString.Lazy as BS
@@ -15,6 +15,10 @@ import qualified Data.Typeable as Typeable
 import qualified System.IO.Streams as Streams
 import qualified Data.ByteString.Builder as Builder
 
+import Crypto.JOSE.JWS
+import Control.Monad.State
+import Crypto.JOSE.JWK
+import Crypto.JOSE.Error
 import GHC.Generics
 import Data.ByteString
 import Data.Aeson
@@ -25,6 +29,8 @@ import Snap.Snaplet
 import Control.Monad.Trans (liftIO, MonadIO)
 import Crypto.BCrypt
 import Data.Maybe
+import System.Random
+import Data.Either
 
 data LoginPayload = LoginPayload {
                                     username :: String,
@@ -50,7 +56,9 @@ logIn = do
                 Just d -> do
                     user <- return $ userFromDocument d
                     case (validatePassword (C.pack $ fromJust $ U.password user) (C.pack $ password p)) of
-                        True -> writeBS "user has access!"
+                        True -> do
+                            jwk <- gets _jwk
+                            finishWithresponseWithToken jwk user
                         False -> finishWithForbidden' "wrong password"
 
 finishWithForbidden :: MonadSnap m => m a
@@ -63,4 +71,13 @@ finishWithForbidden' message = finishWith $ setResponseCode 403 $ setResponseBod
                     Streams.write (Just $ Builder.byteString message) out
                     return out
                     )
+
+finishWithresponseWithToken :: MonadSnap m => JWK -> U.User -> m a
+finishWithresponseWithToken jwk user = do
+    salt <- liftIO $ randomIO
+    payload <- return $ TokenPayload (fromJust $ U.id user) salt
+    token <- liftIO $ doJwsSign jwk payload
+    case token of
+        Left e -> finishWithForbidden
+        Right t -> finishWith $ setResponseCode 200 $ setHeader "x-auth-token" (BS.toStrict $ encode t) emptyResponse
 

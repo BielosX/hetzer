@@ -5,6 +5,7 @@ import HetzerConfig
 import DatabaseConfig
 import Hetzer
 import WebToken
+import Auth
 
 import qualified UsersRepository as UR
 import qualified BooksResource as BR
@@ -35,6 +36,7 @@ import Control.Monad.Trans.Except
 import Control.Monad.Except
 import Snap.Util.FileServe
 import Crypto.JOSE.JWK
+import Data.List
 
 root = [
         ("/", serveFile "index.html"),
@@ -42,8 +44,11 @@ root = [
         ("/css", serveDirectory "css")
     ]
 
+restricted = fmap (\l -> fmap (\(a,b) -> (a, authorize b)) l) [UR.restrictedHandlers, BR.handlers]
+endpoints = [LI.handlers, root, UR.handlers]
+
 hetzerInit db_conf pipe redis_conn jwk = makeSnaplet "hetzer" "hetzer" Nothing $ do
-    addRoutes (UR.handlers ++ BR.handlers ++ LI.handlers ++ root)
+    addRoutes $ Data.List.concat (restricted ++ endpoints)
     return $ Hetzer db_conf pipe redis_conn jwk
 
 getConfFilePath :: [String] -> Either String FilePath

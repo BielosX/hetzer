@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module UsersRepository(handlers) where
+module UsersRepository(handlers, restrictedHandlers) where
 
 import User
 import MongoDBAction
@@ -26,10 +26,14 @@ import Crypto.BCrypt
 
 handlers :: [(ByteString, Handler Hetzer Hetzer ())]
 handlers = [
-            ("users", method POST addNewUser),
-            ("users", method GET getUsers),
-            ("users/:userId", method GET getUser)
+            ("users", method POST addNewUser)
         ]
+
+restrictedHandlers :: [(ByteString, Handler Hetzer Hetzer ())]
+restrictedHandlers = [
+                ("users", method GET getUsers),
+                ("users/:userId", method GET getUser)
+            ]
 
 addNewUser :: Handler Hetzer Hetzer ()
 addNewUser = do

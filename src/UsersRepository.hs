@@ -41,11 +41,11 @@ insertUser :: User -> Handler Hetzer Hetzer ()
 insertUser user = do
     uuid <- liftIO $ randomIO
     encryptedPasswd <- liftIO $ hashPasswordUsingPolicy fastBcryptHashingPolicy (C.pack $ fromMaybe "" $ password user)
-    if isJust encryptedPasswd then do
-        performAction $ DB.insert "users" $ userToDocument $ user {User.id = Just uuid, User.password = (fmap C.unpack encryptedPasswd)}
-        return ()
-    else
-        return ()
+    case encryptedPasswd of
+        Nothing -> return ()
+        Just p -> do
+            performAction $ DB.insert "users" $ userToDocument $ user {User.id = Just uuid, User.password = (fmap C.unpack $ Just p)}
+            return ()
 
 getUser :: Handler Hetzer Hetzer ()
 getUser = do

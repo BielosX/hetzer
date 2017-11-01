@@ -38,8 +38,8 @@ finishWithForbidden' message = finishWith $ setResponseCode 403 $ setResponseBod
                     return out
                     )
 
-finishWithresponseWithToken :: MonadSnap m => Response -> JWK -> UUID -> m a
-finishWithresponseWithToken r jwk uuid = do
+finishWithResponseWithToken :: MonadSnap m => Response -> JWK -> UUID -> m a
+finishWithResponseWithToken r jwk uuid = do
     salt <- liftIO $ randomIO
     payload <- return $ TokenPayload uuid salt
     token <- liftIO $ doJwsSign jwk payload
@@ -47,8 +47,8 @@ finishWithresponseWithToken r jwk uuid = do
         Left e -> finishWithForbidden
         Right t -> finishWith $ setResponseCode 200 $ setHeader "x-auth-token" (BS.toStrict $ encode t) r
 
-finishWithresponseWithToken' :: MonadSnap m => JWK -> UUID -> m a
-finishWithresponseWithToken' = finishWithresponseWithToken emptyResponse
+finishWithResponseWithToken' :: MonadSnap m => JWK -> UUID -> m a
+finishWithResponseWithToken' = finishWithResponseWithToken emptyResponse
 
 authorize :: Handler Hetzer Hetzer () -> Handler Hetzer Hetzer ()
 authorize handler = do
@@ -69,4 +69,4 @@ authorize handler = do
                             putRequest request
                             handler
                             r <- getResponse
-                            finishWithresponseWithToken r jwk (user_id t)
+                            finishWithResponseWithToken r jwk (user_id t)

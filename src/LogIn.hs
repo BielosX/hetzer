@@ -57,6 +57,6 @@ logIn = do
                     case (validatePassword (C.pack $ fromJust $ U.password user) (C.pack $ password p)) of
                         True -> do
                             jwk <- gets _jwk
-                            finishWithresponseWithToken' jwk (fromJust $ U.id user)
+                            finishWithResponseWithToken' jwk (fromJust $ U.id user)
                         False -> finishWithForbidden' "wrong password"
 

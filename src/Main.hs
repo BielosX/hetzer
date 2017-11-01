@@ -68,6 +68,7 @@ runHetzer = do
     decoded <- toExceptT $ (eitherDecode :: LBS.ByteString -> Either String HetzerConfig) $ BSC8.pack content
     pipe <- liftIO $ connectDatabase (mongo decoded)
     redisConn <- liftIO $ Redis.checkedConnect (redisConnectInfo $ RC.addr $ redis decoded)
+    liftIO $ Redis.runRedis redisConn $ Redis.set "appName" "hetzer"
     jwk  <- liftIO $ genJWK (RSAGenParam 512)
     liftIO $ serveSnaplet defaultConfig (hetzerInit (mongo decoded) pipe redisConn jwk)
     liftIO $ DB.close pipe

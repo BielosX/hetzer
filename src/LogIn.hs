@@ -57,6 +57,13 @@ logIn = do
                     case (validatePassword (C.pack $ fromJust $ U.password user) (C.pack $ password p)) of
                         True -> do
                             jwk <- gets _jwk
-                            finishWithResponseWithToken' jwk (fromJust $ U.id user)
+                            redis_cn <- gets _redis_connection
+                            rwt <- liftIO $ responseWithToken' jwk (fromJust $ U.id user)
+                            case rwt of
+                                (response, Nothing) -> finishWith response
+                                (response, Just token) -> do
+                                    liftIO $ registerUserSession redis_cn token
+                                    finishWith response
+                                    return ()
                         False -> finishWithForbidden' "wrong password"
 

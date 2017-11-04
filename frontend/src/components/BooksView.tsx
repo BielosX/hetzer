@@ -30,7 +30,7 @@ export class BooksView extends React.Component<any,any> {
     }
 
     componentDidMount() {
-        axios.get('books')
+        this.props.connector.getBooks()
         .then((response) => {
             this.setState({
                 books: response.data.map(book => ( {data: book, visible: true} ))

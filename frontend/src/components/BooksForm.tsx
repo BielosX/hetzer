@@ -1,14 +1,8 @@
 import * as React from "react";
 import axios from "axios";
 
-const TextBox = (props) => {
-    return(
-        <div className="form-group">
-            <label htmlFor={props.id}>{props.label}</label>
-            <input type={props.type} name={props.name} className="form-control" id={props.id} onChange={props.onChange}/>
-        </div>
-    );
-}
+import {TextBox} from "./TextBox";
+import {HetzerConnector} from "../HetzerConnector";
 
 export class BooksForm extends React.Component<any,any> {
 
@@ -29,7 +23,7 @@ export class BooksForm extends React.Component<any,any> {
 
     onSubmit(event) {
         event.preventDefault();
-        axios.post('books', this.state)
+        this.props.connector.postBooks(this.state)
         .then((response) => {
             console.log(response);
         })
